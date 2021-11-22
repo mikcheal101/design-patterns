@@ -1,4 +1,22 @@
-class Neuron:
+
+
+from abc import ABC
+from collections.abc import Iterable
+
+
+class Connectable(Iterable, ABC):
+
+    def connect_to(self, other):
+        if self == other:
+            return
+
+        for x in self:
+            for y in other:
+                x.outputs.append(y)
+                y.inputs.append(x)
+
+
+class Neuron(Connectable):
     def __init__(self, name: str) -> None:
         self.name = name
         self.inputs = []
@@ -7,12 +25,12 @@ class Neuron:
     def __str__(self) -> str:
         return "{}, {} inputs, {} outputs.".format(self.name, len(self.inputs), len(self.outputs))
 
-    def connect_to(self, other):
-        self.outputs.append(other)
-        other.inputs.append(self)
+    def __iter__(self):
+        # turn a scaler into a vector / array
+        yield self
 
 
-class NeuronLayer(list):
+class NeuronLayer(Connectable, list):
     def __init__(self, name: str, count: int):
         super().__init__()
         self.name = name
@@ -21,16 +39,6 @@ class NeuronLayer(list):
 
     def __str__(self) -> str:
         return "{} with length of {} neurons.".format(self.name, len(self))
-
-
-def connect_to(parent, child):
-    if parent == child:
-        return
-
-    for x in parent:
-        for y in child:
-            x.outputs.append(y)
-            y.inputs.append(x)
 
 
 if __name__ == '__main__':
@@ -44,3 +52,8 @@ if __name__ == '__main__':
     neuron_one.connect_to(layer_one)
     layer_one.connect_to(neuron_two)
     layer_one.connect_to(layer_two)
+
+    print(neuron_one)
+    print(neuron_two)
+    print(layer_one)
+    print(layer_two)
